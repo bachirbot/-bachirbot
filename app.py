@@ -1,48 +1,31 @@
 import os
-from flask import Flask, request
 import requests
+from flask import Flask, request
 
 app = Flask(__name__)
 
 VERIFY_TOKEN = "bachir123"
-PAGE_ACCESS_TOKEN = EAAXQq8zUL58BSr6ACh2iGVu764XZCJJZAxZBJGvmZBgAwsUmjCouW00kuR2ib3moSC75WSaR00N671QLBoZBpUcUSsrcgYzfpQ8FnQzDU14OD4WCU1K9v1YMaqj3H00JLQg5qlAGilpTCwRsef8yU3zI6ZA2TiIZBJJbRZCDeV5hK4fRHZBckBZBZA7NpAgXJM4A97HcNXChLza8WJdFOuKqOHRCwZDZD
+PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN")
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def home():
-    return "Bot is running successfully!"
+    return "Bot is running!"
 
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
     if request.method == "GET":
-        mode = request.args.get("hub.mode")
-        token = request.args.get("hub.verify_token")
-        challenge = request.args.get("hub.challenge")
-
-        if mode == "subscribe" and token == VERIFY_TOKEN:
-            return challenge, 200
-        return "Forbidden", 403
-        
-    elif request.method == "POST":
-        data = request.json
-        if data.get("object") == "page":
-            for entry in data.get("entry", []):
-                for messaging_event in entry.get("messaging", []):
-                    if messaging_event.get("message"):
-                        sender_id = messaging_event["sender"]["id"]
-                        message_text = messaging_event["message"].get("text")
-                        
-                        if message_text:
-                            send_message(sender_id, f"أهلاً بك يا بشير! لقد استقبلت رسالتك: {message_text}")
-                            
-        return "ok", 200
-
-def send_message(recipient_id, message_text):
-    url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
-    payload = {
-        "recipient": {"id": recipient_id},
-        "message": {"text": message_text}
-    }
-    requests.post(url, json=payload)
+        if request.args.get("hub.verify_token") == VERIFY_TOKEN:
+            return request.args.get("hub.challenge")
+        return "Error", 403
+    try:
+        d = request.json
+        s = d['entry'][0]['messaging'][0]['sender']['id']
+        t = d['entry'][0]['messaging'][0]['message']['text']
+        url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
+        requests.post(url, json={"recipient": {"id": s}, "message": {"text": f"أهلاً بك يا بشير: {t}"}})
+    except:
+        pass
+    return "ok", 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
