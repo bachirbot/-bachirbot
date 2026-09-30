@@ -30,8 +30,8 @@ def webhook():
                     reply_text = "أهلاً يا بشير، جاري توليد الرد..."
                     
                     try:
-                        # الاتصال المباشر بخدمة Gemini عبر HTTP API دون الحاجة لمكتبات معقدة
-                        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+                        # الرابط النهائي والثابت للإصدار المعتمد v1
+                        gemini_url = f"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
                         headers = {"Content-Type": "application/json"}
                         payload_gemini = {
                             "contents": [{
