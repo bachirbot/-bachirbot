@@ -11,7 +11,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 @app.route("/")
 def home():
-    return "Bot is running and connected!"
+    return "Bot is running and listening!"
 
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
@@ -21,40 +21,42 @@ def webhook():
         return "Error", 403
     
     try:
-        d = request.json
-        messaging_event = d['entry'][0]['messaging'][0]
-        
-        # التأكد من أن الرسالة تحتوي على نص مرسل من المستخدم
-        if 'message' in messaging_event and 'text' in messaging_event['message']:
-            s = messaging_event['sender']['id']
-            t = messaging_event['message']['text'].strip()
-            
-            reply_text = "أهلاً بك يا بشير. جاري معالجة طلبك..."
-            
-            # محاولة جلب الإجابة من الذكاء الاصطناعي
-            try:
-                client = genai.Client(api_key=GEMINI_API_KEY)
-                response = client.models.generate_content(
-                    model="gemini-1.5-flash",
-                    contents=t,
-                )
-                if response and response.text:
-                    reply_text = response.text
-            except Exception as ai_error:
-                print("AI Error Details:", ai_error)
-                reply_text = f"أهلاً بك يا بشير. لقد استلمت سؤالك: '{t}' وأنا أجهزه لك الآن!"
+        data = request.json
+        for entry in data.get('entry', []):
+            for messaging_event in entry.get('messaging', []):
+                # التحقق من أن الحدث عبارة عن رسالة أرسلها المستخدم وتحتوي على نص
+                if 'message' in messaging_event and 'text' in messaging_event['message']:
+                    sender_id = messaging_event['sender']['id']
+                    message_text = messaging_event['message']['text'].strip()
+                    
+                    print(f"Received message from {sender_id}: {message_text}")
+                    
+                    reply_text = "أهلاً بك يا بشير. جاري معالجة طلبك..."
+                    
+                    # جلب الإجابة من الذكاء الاصطناعي
+                    try:
+                        client = genai.Client(api_key=GEMINI_API_KEY)
+                        response = client.models.generate_content(
+                            model="gemini-1.5-flash",
+                            contents=message_text,
+                        )
+                        if response and response.text:
+                            reply_text = response.text
+                    except Exception as ai_error:
+                        print("AI Error:", ai_error)
+                        reply_text = f"أهلاً بك يا بشير. لقد استلمت رسالتك: '{message_text}' وأنا أجهز لك الرد الآن!"
 
-            # إرسال الرد عبر فيسبوك ماسنجر
-            url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
-            payload = {
-                "recipient": {"id": s},
-                "message": {"text": reply_text}
-            }
-            res = requests.post(url, json=payload)
-            print("Facebook API Response:", res.text)
-            
+                    # إرسال الرد عبر فيسبوك ماسنجر
+                    url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
+                    payload = {
+                        "recipient": {"id": sender_id},
+                        "message": {"text": reply_text}
+                    }
+                    res = requests.post(url, json=payload)
+                    print("FB Send Response:", res.text)
+                    
     except Exception as e:
-        print("Webhook Main Error:", e)
+        print("Webhook Error:", e)
         
     return "ok", 200
 
