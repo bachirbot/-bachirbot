@@ -1,4 +1,3 @@
-flask
+Flask
 requests
-google-generativeai
-protobuf
+
