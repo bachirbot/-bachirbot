@@ -1,8 +1,15 @@
-import os, requests; from flask import Flask, request; app=Flask(__name__)
-VERIFY_TOKEN="bachir123"; PAGE_ACCESS_TOKEN=EAAXQ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
-●
-@app.route("/", methods=["GET"])
-def home(): return "Bot is running!"
+import os
+import requests
+from flask import Flask, request
+
+app = Flask(__name__)
+
+VERIFY_TOKEN = "bachir123"
+PAGE_ACCESS_TOKEN = EAAXQ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●
+
+@app.route("/")
+def home():
+    return "Bot is running!"
 
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
@@ -14,9 +21,11 @@ def webhook():
         d = request.json
         s = d['entry'][0]['messaging'][0]['sender']['id']
         t = d['entry'][0]['messaging'][0]['message']['text']
-        requests.post(f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}", json={"recipient": {"id": s}, "message": {"text": f"أهلاً بك يا بشير: {t}"}})
-    except: pass
+        url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
+        requests.post(url, json={"recipient": {"id": s}, "message": {"text": f"أهلاً: {t}"}})
+    except:
+        pass
     return "ok", 200
 
-if __name__ == "__main__": app.run(host="0.0.0.0", port=10000)
-
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
