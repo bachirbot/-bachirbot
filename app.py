@@ -30,7 +30,7 @@ def webhook():
                     reply_text = "أهلاً يا بشير، جاري توليد الرد..."
                     
                     try:
-                        # استخدام نموذج gemini-1.5-flash لتجنب الضغط المؤقت
+                        # استخدام النموذج المستقر وتوجيه الذكاء الاصطناعي للإجابة باللغة العربية بوضوح
                         gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
                         headers = {
                             "Content-Type": "application/json",
@@ -38,7 +38,9 @@ def webhook():
                         }
                         payload_gemini = {
                             "contents": [{
-                                "parts": [{"text": message_text}]
+                                "parts": [
+                                    {"text": "أنت مساعد ذكي ومفيد. أجب دائماً وبوضوح باللغة العربية الفصحى على السؤال التالي: " + message_text}
+                                ]
                             }]
                         }
                         
