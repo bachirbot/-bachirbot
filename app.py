@@ -1,15 +1,17 @@
 import os
 import requests
 from flask import Flask, request
+from google import genai
 
 app = Flask(__name__)
 
 VERIFY_TOKEN = "bachir123"
 PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 @app.route("/")
 def home():
-    return "Bot is running!"
+    return "Bot is running with AI!"
 
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
@@ -22,18 +24,22 @@ def webhook():
         s = d['entry'][0]['messaging'][0]['sender']['id']
         t = d['entry'][0]['messaging'][0]['message']['text'].strip()
         
-        # الرد المباشر بذكاء بناءً على ما ترسله أنت بدون جمل ترحيبية ثابتة
-        if "سلام" in t or "مرحباً" in t or "كيف حالك" in t:
-            reply_text = "وعليكم السلام! أنا بكامل جاهزيتي لمساعدتك في أعمالك ومشاريعك اليوم."
-        elif "من أنت" in t:
-            reply_text = "أنا Bachirbot، مساعدك الرقمي المخصص لتنفيذ مهامك وإدارتها."
-        else:
-            reply_text = f"لقد استلمت رسالتك حول: '{t}'. أنا أتابع معك وجاهز لتنفيذ المطلوب بكل إتقان!"
+        # محاولة توليد الإجابة عبر الذكاء الاصطناعي
+        try:
+            client = genai.Client(api_key=GEMINI_API_KEY)
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=t,
+            )
+            reply_text = response.text
+        except Exception as ai_err:
+            # رد احتياطي فوري لو حدث أي تأخير في الاتصال
+            reply_text = f"أهلاً بك يا بشير. لقد استلمت سؤالك: '{t}' وأنا أجهزه لك فوراً!"
 
-        # إرسال الرد عبر الماسنجر
+        # إرسال الإجابة عبر الماسنجر
         url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
         requests.post(url, json={"recipient": {"id": s}, "message": {"text": reply_text}})
-    except:
+    except Exception as e:
         pass
     return "ok", 200
 
