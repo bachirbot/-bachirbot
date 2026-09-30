@@ -1,23 +1,4 @@
-import os
-import requests
-from flask import Flask, request
-
-app = Flask(__name__)
-
-VERIFY_TOKEN = "bachir123"
-PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN")
-
-@app.route("/")
-def home():
-    return "Bot is running!"
-
-@app.route("/webhook", methods=["GET", "POST"])
-def webhook():
-    if request.method == "GET":
-        if request.args.get("hub.verify_token") == VERIFY_TOKEN:
-            return request.args.get("hub.challenge")
-        return "Error", 403
-        try:
+    try:
         d = request.json
         s = d['entry'][0]['messaging'][0]['sender']['id']
         t = d['entry'][0]['messaging'][0]['message']['text'].strip()
@@ -35,7 +16,3 @@ def webhook():
         requests.post(url, json={"recipient": {"id": s}, "message": {"text": reply_text}})
     except:
         pass
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
