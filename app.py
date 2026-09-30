@@ -1,11 +1,15 @@
 import os
 from flask import Flask, request
+import requests
 
 app = Flask(__name__)
 
+VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN", "bachir123")
+PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN", "ضع_رمز_الوصول_هنا")
+
 @app.route("/", methods=["GET"])
 def home():
-    return "Bot is running successfully!", 200
+    return "Bot is running successfully!"
 
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
@@ -14,14 +18,31 @@ def webhook():
         token = request.args.get("hub.verify_token")
         challenge = request.args.get("hub.challenge")
 
-        if mode == "subscribe" and token == "bachir_token_123":
+        if mode == "subscribe" and token == VERIFY_TOKEN:
             return challenge, 200
         return "Forbidden", 403
+        
     elif request.method == "POST":
         data = request.json
-        print(data)
-        return "EVENT_RECEIVED", 200
+        if data.get("object") == "page":
+            for entry in data.get("entry", []):
+                for messaging_event in entry.get("messaging", []):
+                    if messaging_event.get("message"):
+                        sender_id = messaging_event["sender"]["id"]
+                        message_text = messaging_event["message"].get("text")
+                        
+                        if message_text:
+                            send_message(sender_id, f"أهلاً بك يا بشير! لقد استقبلت رسالتك: {message_text}")
+                            
+        return "ok", 200
+
+def send_message(recipient_id, message_text):
+    url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
+    payload = {
+        "recipient": {"id": recipient_id},
+        "message": {"text": message_text}
+    }
+    requests.post(url, json=payload)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=10000)
