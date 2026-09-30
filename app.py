@@ -11,7 +11,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 @app.route("/")
 def home():
-    return "Bot is running and listening!"
+    return "Bachirbot AI is online and running!"
 
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
@@ -24,16 +24,14 @@ def webhook():
         data = request.json
         for entry in data.get('entry', []):
             for messaging_event in entry.get('messaging', []):
-                # التحقق من أن الحدث عبارة عن رسالة أرسلها المستخدم وتحتوي على نص
                 if 'message' in messaging_event and 'text' in messaging_event['message']:
                     sender_id = messaging_event['sender']['id']
                     message_text = messaging_event['message']['text'].strip()
                     
-                    print(f"Received message from {sender_id}: {message_text}")
+                    print(f"Received from {sender_id}: {message_text}")
                     
-                    reply_text = "أهلاً بك يا بشير. جاري معالجة طلبك..."
-                    
-                    # جلب الإجابة من الذكاء الاصطناعي
+                    # توليد الإجابة الحقيقية عبر الذكاء الاصطناعي
+                    reply_text = "عذراً، حدث خطأ بسيط في معالجة طلبك، حاول مجدداً."
                     try:
                         client = genai.Client(api_key=GEMINI_API_KEY)
                         response = client.models.generate_content(
@@ -42,18 +40,18 @@ def webhook():
                         )
                         if response and response.text:
                             reply_text = response.text
-                    except Exception as ai_error:
-                        print("AI Error:", ai_error)
-                        reply_text = f"أهلاً بك يا بشير. لقد استلمت رسالتك: '{message_text}' وأنا أجهز لك الرد الآن!"
+                    except Exception as ai_err:
+                        print("AI Error details:", ai_err)
+                        reply_text = f"أهلاً بك يا بشير. لقد استلمت سؤالك وأنا أعمل عليه الآن."
 
-                    # إرسال الرد عبر فيسبوك ماسنجر
+                    # إرسال الإجابة الذكية عبر الماسنجر
                     url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
                     payload = {
                         "recipient": {"id": sender_id},
                         "message": {"text": reply_text}
                     }
                     res = requests.post(url, json=payload)
-                    print("FB Send Response:", res.text)
+                    print("FB Response:", res.text)
                     
     except Exception as e:
         print("Webhook Error:", e)
