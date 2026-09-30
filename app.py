@@ -34,8 +34,8 @@ def webhook():
                     reply_text = "أهلاً يا بشير، جاري توليد الرد..."
                     
                     try:
-                        # استخدام الموديل المتوافق والمستقر
-                        model = genai.GenerativeModel('gemini-1.5-flash')
+                        # استخدام موديل gemini-pro لضمان الاستقرار والتوافق التام
+                        model = genai.GenerativeModel('gemini-pro')
                         response = model.generate_content(message_text)
                         if response and response.text:
                             reply_text = response.text
