@@ -22,7 +22,7 @@ def webhook():
         s = d['entry'][0]['messaging'][0]['sender']['id']
         t = d['entry'][0]['messaging'][0]['message']['text']
         url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
-        requests.post(url, json={"recipient": {"id": s}, "message": {"text": f"أهلاً بك يا بشير: {t}"}})
+        requests.post(url, json={"recipient": {"id": s}, "message": {"text": f"أهلاً: {t}"}})
     except:
         pass
     return "ok", 200
