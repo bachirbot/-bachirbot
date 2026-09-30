@@ -30,7 +30,8 @@ def webhook():
                     reply_text = "أهلاً يا بشير، جاري توليد الرد..."
                     
                     try:
-                        gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
+                        # استخدام نموذج gemini-1.5-flash لتجنب الضغط المؤقت
+                        gemini_url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
                         headers = {
                             "Content-Type": "application/json",
                             "X-goog-api-key": GEMINI_API_KEY
@@ -46,7 +47,7 @@ def webhook():
                             res_data = res.json()
                             reply_text = res_data['candidates'][0]['content']['parts'][0]['text']
                         else:
-                            reply_text = f"عذراً يا بشير، رمز الاستجابة من جيميناي هو: {res.status_code} - {res.text}"
+                            reply_text = f"عذراً يا بشير، رمز الاستجابة هو: {res.status_code} - {res.text}"
                     except Exception as e:
                         print(f"API Error: {e}")
                         reply_text = f"حدث خطأ أثناء الاتصال: {str(e)}"
