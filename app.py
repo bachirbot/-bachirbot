@@ -34,15 +34,14 @@ def webhook():
                     reply_text = "أهلاً يا بشير، جاري توليد الرد..."
                     
                     try:
-                        # استخدام الطريقة المباشرة لتوليد المحتوى
-                        model = genai.GenerativeModel('gemini-pro')
+                        # استخدام الموديل المتوافق والمستقر
+                        model = genai.GenerativeModel('gemini-1.5-flash')
                         response = model.generate_content(message_text)
                         if response and response.text:
                             reply_text = response.text
                     except Exception as e:
                         print(f"Gemini API Error: {e}")
-                        # إذا حدث خطأ، نضع رسالة توضح الخطأ لنتأكد منه
-                        reply_text = f"مرحباً يا بشير، استلمت رسالتك ولكن مفتاح Gemini API يحتاج للتحقق. الخطأ: {str(e)}"
+                        reply_text = f"مرحباً يا بشير، استلمت رسالتك وحدث خطأ بسيط في جلب الرد: {str(e)}"
 
                     # إرسال الرد عبر الماسنجر
                     url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
@@ -57,6 +56,5 @@ def webhook():
         
     return "ok", 200
 
-
-    if __name__ == "__main__":app.run(host="0.0.0.0", port=10000)
-
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
