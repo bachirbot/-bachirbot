@@ -1,16 +1,12 @@
 import os
 import requests
 from flask import Flask, request
-import google.generativeai as genai
 
 app = Flask(__name__)
 
 VERIFY_TOKEN = "bachir123"
 PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
 
 @app.route("/")
 def home():
@@ -34,14 +30,24 @@ def webhook():
                     reply_text = "أهلاً يا بشير، جاري توليد الرد..."
                     
                     try:
-                        # استخدام موديل gemini-pro لضمان الاستقرار والتوافق التام
-                        model = genai.GenerativeModel('gemini-pro')
-                        response = model.generate_content(message_text)
-                        if response and response.text:
-                            reply_text = response.text
+                        # الاتصال المباشر بخدمة Gemini عبر HTTP API دون الحاجة لمكتبات معقدة
+                        gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+                        headers = {"Content-Type": "application/json"}
+                        payload_gemini = {
+                            "contents": [{
+                                "parts": [{"text": message_text}]
+                            }]
+                        }
+                        
+                        res = requests.post(gemini_url, json=payload_gemini, headers=headers)
+                        if res.status_code == 200:
+                            res_data = res.json()
+                            reply_text = res_data['candidates'][0]['content']['parts'][0]['text']
+                        else:
+                            reply_text = f"عذراً يا بشير، رمز الاستجابة من جيميناي هو: {res.status_code}"
                     except Exception as e:
-                        print(f"Gemini API Error: {e}")
-                        reply_text = f"مرحباً يا بشير، استلمت رسالتك وحدث خطأ بسيط في جلب الرد: {str(e)}"
+                        print(f"API Error: {e}")
+                        reply_text = f"حدث خطأ أثناء الاتصال: {str(e)}"
 
                     # إرسال الرد عبر الماسنجر
                     url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
