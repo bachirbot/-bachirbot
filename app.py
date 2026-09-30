@@ -14,7 +14,7 @@ if GEMINI_API_KEY:
 
 @app.route("/")
 def home():
-    return "Bachirbot is active!"
+    return "Bachirbot is running perfectly!"
 
 @app.route("/webhook", methods=["GET", "POST"])
 def webhook():
@@ -25,45 +25,37 @@ def webhook():
     
     try:
         data = request.json
-        print("Incoming JSON data:", data)
-        
         for entry in data.get('entry', []):
             for messaging_event in entry.get('messaging', []):
                 if 'message' in messaging_event and 'text' in messaging_event['message']:
                     sender_id = messaging_event['sender']['id']
                     message_text = messaging_event['message']['text'].strip()
                     
-                    print(f"Processing message from {sender_id}: {message_text}")
+                    reply_text = "أهلاً يا بشير، جاري توليد الرد..."
                     
-                    # النص الافتراضي في حال حدوث أي تأخير
-                    reply_text = f"أهلاً يا بشير، وصلتني رسالتك: '{message_text}'"
-                    
-                    # محاولة توليد الإجابة من الذكاء الاصطناعي بأمان
                     try:
-                        if GEMINI_API_KEY:
-                            model = genai.GenerativeModel('gemini-1.5-flash')
-                            response = model.generate_content(message_text)
-                            if response and response.text:
-                                reply_text = response.text
-                        else:
-                            reply_text = "تنبيه: مفتاح Gemini API غير مضبوط في Render."
-                    except Exception as ai_err:
-                        print(f"AI Generation Error: {ai_err}")
-                        reply_text = f"أهلاً يا بشير، استلمت سؤالك ولكني واجهت ضغطاً في الرد الآلي، أنا هنا لمساعدتك!"
+                        # استخدام الطريقة المباشرة لتوليد المحتوى
+                        model = genai.GenerativeModel('gemini-pro')
+                        response = model.generate_content(message_text)
+                        if response and response.text:
+                            reply_text = response.text
+                    except Exception as e:
+                        print(f"Gemini API Error: {e}")
+                        # إذا حدث خطأ، نضع رسالة توضح الخطأ لنتأكد منه
+                        reply_text = f"مرحباً يا بشير، استلمت رسالتك ولكن مفتاح Gemini API يحتاج للتحقق. الخطأ: {str(e)}"
 
-                    # إرسال الرد فوراً عبر الماسنجر
+                    # إرسال الرد عبر الماسنجر
                     url = f"https://graph.facebook.com/v18.0/me/messages?access_token={PAGE_ACCESS_TOKEN}"
                     payload = {
                         "recipient": {"id": sender_id},
                         "message": {"text": reply_text}
                     }
-                    res = requests.post(url, json=payload)
-                    print(f"Facebook Send Status: {res.status_code}, Response: {res.text}")
+                    requests.post(url, json=payload)
                     
     except Exception as err:
-        print(f"Webhook Main Error: {err}")
+        print(f"Webhook Error: {err}")
         
     return "ok", 200
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(0.0.0.0, 10000)
