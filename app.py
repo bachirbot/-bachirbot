@@ -1,4 +1,4 @@
-import os
+منimport os
 import requests
 from flask import Flask, request
 import google.generativeai as genai
@@ -57,5 +57,7 @@ def webhook():
         
     return "ok", 200
 
-if __name__ == "__main__":
-    app.run(0.0.0.0, 10000)
+
+    if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
+
