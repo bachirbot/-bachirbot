@@ -5,8 +5,7 @@ import requests
 app = Flask(__name__)
 
 VERIFY_TOKEN = os.environ.get("VERIFY_TOKEN", "bachir123")
-PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKEN", "ضع_رمز_الوصول_هنا")
-
+PAGE_ACCESS_TOKEN = os.environ.get("PAGE_ACCESS_TOKELA_EAAXQ●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●●")
 @app.route("/", methods=["GET"])
 def home():
     return "Bot is running successfully!"
